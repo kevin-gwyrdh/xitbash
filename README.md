@@ -24,13 +24,13 @@ Use # and + to mark tags
 # USAGE
 -o open file in editor
 
--e <line> open file in editor at line specified
+-e 'line' open file in editor at line specified
 
--a '<new task>' add new task
+-a 'new task' add new task
 
--s '<search term>' search
+-s 'search term' search
 
--c <line> <new status> change task status
+-c 'line' 'new status' change task status
 
 -x print task list in terminal
 
