@@ -1,5 +1,6 @@
 # INTRO
-A simple bash script to allow display and editing of a x[it] formated task file
+xit-bash is a simple bash script to allow display and editing of a x[it] formated task file
+
 
 Suggestions for improving the code welcome :-)
 
@@ -11,7 +12,11 @@ initial terminal code discussion https://github.com/jotaen/xit/discussions/12
 grep gensub https://github.com/coderofsalvation/kanban.bash
 
 # NOTES
-xit changes to allow todo.txt task lists to work
+There are two versions. 
+
+xit tries to follow the [x]it format 
+
+xit-bash has made some changes to the [x]it format to allow todo.txt task lists to work
 
 ( ) used instead of [ ] 
 
