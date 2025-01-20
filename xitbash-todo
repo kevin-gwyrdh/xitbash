@@ -127,7 +127,7 @@ printf "\n \n" >> "$TEMP"temp1.txt
 # create column two
 touch "$TEMP"temp2.txt
 printf "$C4 _______________________ "WORK" ____________________ $C0 \n" > "$TEMP"temp2.txt
-printf "$C4>$C0   \n" >> ~/Dropbox/2do/temp2.txt
+printf "$C4>$C0   \n" >> "$TEMP"temp2.txt
 grep -n '^(@' "$XIT_HOME" >> "$TEMP"temp2.txt
 grep -n '^(A' "$XIT_HOME" >> "$TEMP"temp2.txt
 printf "\n \n" >> "$TEMP"temp2.txt
