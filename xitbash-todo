@@ -1,0 +1,163 @@
+#!/usr/bin/env bash
+
+# REF
+# [x]it https://github.com/jotaen/xit
+# initial terminal code discussion https://github.com/jotaen/xit/discussions/12
+# grep gensub https://github.com/coderofsalvation/kanban.bash
+
+# NOTES
+# xit changes to allow todo.txt task lists to work
+# ( ) used instead of [ ] 
+# (A) used to match (@)
+# (W) used to match (.)
+# # and + mark tags
+
+# CONFIG
+# set home location .md or .xit or .txt
+XIT_HOME=~/foo/bar/tasks.md
+# set location for temp files these are deleted after use
+# clunky I know
+TEMP=~/foo/bar/
+EDITOR=nano
+# if a different editor to nano is used then the -l switch to show line numbers and the +$2 switch to open nano with the cursor at the $2 line may not work
+
+# Colour codes ;0m normal ;1m bold ;2m faint ;3m italic ;4m underline
+# text reset
+C0="\033[0m"
+# white bold
+C1="\033[37;1m"
+# red bold
+C2="\033[31;1m"
+# grey underline
+C3="\033[90;4m"
+# green bold
+C4="\033[32;1m"
+# cyan bold
+C5="\033[36;1m"
+# blue bold
+C6="\033[34;1m"
+# purple bold
+C7="\033[35;1m"
+# yellow bold
+C8="\033[33;1m"
+# grey bold
+C9="\033[90;1m"
+
+if [ $# -eq 0 ] || [ "$1" = "-x" ]; then
+	# x) print tasks with colour
+	# grep shows all lines beginning with ( and -n the line numbers -T aligns it nicely
+	# awk then adds in the colour codes
+	# TODO work out gensub so that (x) changes whole line; currently -> and # still stay the same
+			grep -nT ^\( "$XIT_HOME" | awk '{ 
+    a = gensub(/\( \)/,"'$C5'&'$C0'","g")
+    a = gensub(/!/,"'$C2'&'$C0'","g",a)
+    a = gensub(/->([a-zA-Z0-9_\. -]+)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(x\)([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
+    a = gensub(/\(~\)([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
+    a = gensub(/\(\.\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(W\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(@\)/,"'$C4'&'$C0'","g",a)
+    a = gensub(/\(A\)/,"'$C4'&'$C0'","g",a)
+    a = gensub(/\(\?\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/+([a-zA-Z0-9_\.-]+)/,"'$C1'&'$C0'","g",a)
+    a = gensub(/#([a-zA-Z0-9_\.-]+)/,"'$C1'&'$C0'","g",a)
+    print a
+  }'
+
+elif [ "$1" = "-o" ]; then
+	# editor opens the file
+	$EDITOR -l $XIT_HOME
+
+elif [ "$1" = "-a" ]; then    
+    # a) # Requires use of single quotes for the use of exclamation mark
+    # add a new task $2
+    # open status preset
+    # use single quotes 
+	echo "( ) $2" >> $XIT_HOME
+	xit
+      
+elif [ "$1" = "-s" ]; then
+    # s Doesn't handle multiline
+    # grep does the search and awk adds in the colour codes
+	grep -nT "$2" $XIT_HOME | awk '{ 
+    a = gensub(/\( \)/,"'$C5'&'$C0'","g")
+    a = gensub(/!/,"'$C2'&'$C0'","g",a)
+    a = gensub(/->([a-zA-Z0-9_\. -]+)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(x\)([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
+    a = gensub(/\(~\)([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
+    a = gensub(/\(\.\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(W\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(@\)/,"'$C4'&'$C0'","g",a)
+    a = gensub(/\(A\)/,"'$C4'&'$C0'","g",a)
+    a = gensub(/\(\?\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/+([a-zA-Z0-9_\.-]+)/,"'$C1'&'$C0'","g",a)
+    a = gensub(/#([a-zA-Z0-9_\.-]+)/,"'$C1'&'$C0'","g",a)
+    print a
+  }'
+	
+elif [ "$1" = "-e" ]; then
+	# e) edit at specified line
+	# opens editor and places cursor at start of line $2
+	$EDITOR -l +"$2" $XIT_HOME
+	
+elif [ "$1" = "-c" ]; then
+    # c) change the selected line status from input
+    # $2 is the line number . is the current status $3 is the new status
+    # xit -c 15 x would change the status of line 15 to x or done 
+	sed -i "$2"s/./"$3"/2 $XIT_HOME
+	xit
+ 
+  
+elif [ "$1" = "-d" ]; then
+	# d) delete the specified line $2
+	sed -i -e "$2"d "$XIT_HOME"
+	xit
+
+# Kanban view - only two columns with different status grouped in each column
+elif [ "$1" = "-k" ]; then
+# create column one
+touch "$TEMP"temp1.txt
+printf "$C5 _______________________ "INBOX" ___________________ $C0 \n" > "$TEMP"temp1.txt
+printf "$C5>$C0   \n" >> "$TEMP"temp1.txt
+# status included .. grep for each on seperate lines for clarity!
+grep -n '^( ' "$XIT_HOME" >> "$TEMP"temp1.txt
+grep -n '^(W' "$XIT_HOME" >> "$TEMP"temp1.txt
+grep -n '^(?' "$XIT_HOME" >> "$TEMP"temp1.txt
+printf "\n \n" >> "$TEMP"temp1.txt
+# create column two
+touch "$TEMP"temp2.txt
+printf "$C4 _______________________ "WORK" ____________________ $C0 \n" > "$TEMP"temp2.txt
+printf "$C4>$C0   \n" >> ~/Dropbox/2do/temp2.txt
+grep -n '^(@' "$XIT_HOME" >> "$TEMP"temp2.txt
+grep -n '^(A' "$XIT_HOME" >> "$TEMP"temp2.txt
+printf "\n \n" >> "$TEMP"temp2.txt
+# paste and column create the kanban and awk provides the colour
+paste "$TEMP"temp1.txt "$TEMP"temp2.txt | column -t -s $'\t' -o '   ' | awk '{ 
+    a = gensub(/\( \)/,"'$C5'&'$C0'","g")
+    a = gensub(/!/,"'$C2'&'$C0'","g",a)
+    a = gensub(/->([a-zA-Z0-9_\. -]+)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(x\)([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
+    a = gensub(/\(~\)([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
+    a = gensub(/\(\.\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(W\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/\(@\)/,"'$C4'&'$C0'","g",a)
+    a = gensub(/\(A\)/,"'$C4'&'$C0'","g",a)
+    a = gensub(/\(\?\)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/+([a-zA-Z0-9_\.-]+)/,"'$C1'&'$C0'","g",a)
+    a = gensub(/#([a-zA-Z0-9_\.-]+)/,"'$C1'&'$C0'","g",a)
+    print a
+  }'
+# Clean up temp  files
+rm "$TEMP"temp2.txt "$TEMP"temp1.txt
+
+else
+	echo "Sorry don't understand that!" 
+	echo "Usage:" 
+	echo "-o open file in editor"
+	echo "-e <line> open file in editor at line specified"
+	echo "-a '<new task>' add new task"  
+	echo "-s '<search term>' search" 
+	echo "-c <line> <new status> change task status" 
+	echo "-x print task list in terminal" 
+	echo "-k print kanban view in terminal"
+fi
