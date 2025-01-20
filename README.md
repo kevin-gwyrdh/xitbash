@@ -19,7 +19,7 @@ xit changes to allow todo.txt task lists to work
 
 (W) used to match (.)
 
-# and + mark tags
+Use # and + to mark tags
 
 # USAGE
 -o open file in editor
