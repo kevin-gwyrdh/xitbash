@@ -121,7 +121,7 @@ printf "\n \n" >> "$TEMP"temp2.txt
 paste "$TEMP"temp1.txt "$TEMP"temp2.txt | column -t -s $'\t' -o '   ' | awk '{ 
     a = gensub(/\[ \]/,"'$C5'&'$C0'","g")
     a = gensub(/!/,"'$C2'&'$C0'","g",a)
-    a = gensub(/->([a-zA-Z0-9_\. -]+)/,"'$C8'&'$C0'","g",a)
+    a = gensub(/-> ([a-zA-Z0-9_\. -]+)/,"'$C8'&'$C0'","g",a)
     a = gensub(/\[x\]([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
     a = gensub(/\[~\]([a-zA-Z0-9_\. -]+)/,"'$C9'&'$C0'","g",a)
     a = gensub(/\[\.\]/,"'$C8'&'$C0'","g",a)
